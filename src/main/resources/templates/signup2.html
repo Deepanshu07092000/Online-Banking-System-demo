@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Application - Page 2</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --accent-gold: #ffb800;
+            --border-color: rgba(255, 184, 0, 0.3);
+            --text-main: #e0e0e0;
+            --text-dim: #a0a0a0;
+            --card-glass: rgba(255, 255, 255, 0.05);
+            --error-red: #ff4b2b;
+        }
+
+        /* Styles kept from your original code */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            overflow-x: hidden;
+            background: linear-gradient(270deg, #0d0d0d, #1a1a1a, #000000);
+            background-size: 600% 600%;
+            animation: gradientMove 10s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .bg-animation span { position: absolute; display: block; border-radius: 50%; background: rgba(255, 165, 0, 0.12); animation: float 20s linear infinite; bottom: -150px; }
+        .bg-animation span:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-duration: 15s; }
+        .bg-animation span:nth-child(2) { width: 120px; height: 120px; left: 30%; animation-duration: 18s; }
+        .bg-animation span:nth-child(3) { width: 60px; height: 60px; left: 50%; animation-duration: 12s; }
+        .bg-animation span:nth-child(4) { width: 150px; height: 150px; left: 70%; animation-duration: 22s; }
+        .bg-animation span:nth-child(5) { width: 100px; height: 100px; left: 85%; animation-duration: 17s; }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.4; }
+            100% { transform: translateY(-1000px) scale(1.3); opacity: 0; }
+        }
+
+        .form-card {
+            position: relative;
+            z-index: 2;
+            background-color: var(--card-glass);
+            width: 100%;
+            max-width: 650px;
+            padding: 45px;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            margin: 40px 20px;
+        }
+
+        h1 { text-align: center; font-size: 28px; margin-bottom: 5px; letter-spacing: 1px; }
+        .form-no { text-align: center; color: var(--accent-gold); font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .page-title { text-align: center; color: var(--text-dim); margin-bottom: 40px; font-size: 1rem; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            align-items: center;
+            margin-bottom: 22px;
+            gap: 20px;
+        }
+
+        label { font-weight: 500; color: #ccc; font-size: 14px; }
+
+        select, input[type="text"] {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--accent-gold);
+            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px rgba(255, 184, 0, 0.2);
+        }
+
+        /* CUSTOM VALIDATION ALERTS */
+        .input-container { position: relative; }
+        
+        .field-alert {
+            color: #ff8e7a;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input.invalid-field {
+            border-color: var(--error-red) !important;
+            box-shadow: 0 0 8px rgba(255, 75, 43, 0.2) !important;
+        }
+
+        .radio-group { display: flex; gap: 35px; align-items: center; }
+        .radio-item { display: flex; align-items: center; cursor: pointer; gap: 10px; font-size: 14px; }
+        input[type="radio"] { accent-color: var(--accent-gold); width: 18px; height: 18px; margin: 0; cursor: pointer; }
+
+        .declaration-row { margin: 30px 0; display: flex; gap: 12px; align-items: flex-start; color: var(--text-dim); font-size: 0.85rem; line-height: 1.5; }
+        input[type="checkbox"] { accent-color: var(--accent-gold); margin-top: 3px; cursor: pointer; }
+
+        .submit-container { display: flex; justify-content: center; margin-top: 25px; }
+        .submit-btn { background-color: var(--accent-gold); color: black; border: none; padding: 14px 70px; font-weight: bold; font-size: 16px; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; }
+        .submit-btn:hover { background-color: #ffcc00; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 184, 0, 0.3); }
+
+        .alert-success {
+		    margin-top: 20px;
+		    padding: 12px;
+		    background: rgba(0,255,0,0.1);
+		    color: #00ff88;
+		    border: 1px solid #00ff88;
+		    border-radius: 8px;
+		    text-align: center;
+		}
+		
+		.alert-error {
+		    margin-top: 20px;
+		    padding: 12px;
+		    background: rgba(255, 75, 43, 0.1); /* Red tint */
+		    color: #ff8e7a;
+		    border: 1px solid #ff4b2b;
+		    border-radius: 8px;
+		    text-align: center;
+		}
+
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; gap: 8px; }
+            .form-card { padding: 25px; margin: 15px; }
+            .radio-group { gap: 15px; flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-animation">
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="form-card">
+    <h1>Additional Details</h1>
+    <p class="form-no">FORM NO: <span th:text="${formNo}"></span></p>
+    <p class="page-title">Page 2: Final Details</p>
+
+    <form action="/api/auth/register" method="POST" id="signupForm">
+        <div class="form-row">
+            <label>Category</label>
+            <select name="category">
+                <option>General</option>
+                <option>OBC</option>
+                <option>SC/ST</option>
+                <option>Others</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Income</label>
+            <select name="income">
+                <option>Null</option>
+                <option>Less than 1.5L</option>
+                <option>1.5L - 2.5L</option>
+                <option>2.5L - 5L</option>
+                <option>5L - 10L</option>
+                <option>Above 10L</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Education</label>
+            <select name="education">
+                <option>Non-Graduate</option>
+                <option>Graduate</option>
+                <option>Post-Graduate</option>
+                <option>Doctorate</option>
+                <option>Others</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Occupation</label>
+            <select name="occupation">
+                <option>Salaried</option>
+                <option>Self-Employed</option>
+                <option>Student</option>
+                <option>Business</option>
+                <option>Retired</option>
+                <option>Others</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>PAN Number</label>
+            <div class="input-container">
+                <input type="text" name="panNumber" id="panInput" placeholder="eg: ABCDE1234F" required>
+                <div class="field-alert" id="panAlert">⚠ Invalid PAN format. Please follow the standard (ABCDE1234F).</div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Aadhar Number</label>
+            <div class="input-container">
+                <input type="text" name="aadharNumber" id="aadharInput" placeholder="12-digit numeric code" required maxlength="12">
+                <div class="field-alert" id="aadharAlert">⚠ Must contain exactly 12 digits (numeric only).</div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Senior Citizen</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="seniorCitizen" value="Yes"> Yes</label>
+                <label class="radio-item"><input type="radio" name="seniorCitizen" value="No" checked> No</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Account Type</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="accountType" value="Savings" checked> Savings</label>
+                <label class="radio-item"><input type="radio" name="accountType" value="Current"> Current</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Existing Account</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="existingAccount" value="Yes"> Yes</label>
+                <label class="radio-item"><input type="radio" name="existingAccount" value="No" checked> No</label>
+            </div>
+        </div>
+
+        <div class="declaration-row">
+            <input type="checkbox" id="confirm" name="termsAccepted" required>
+            <label for="confirm">I hereby declare that the above entered details are correct to the best of my knowledge.</label>
+        </div>
+		
+		<div th:if="${success}" class="alert-success">
+		    <strong th:text="${success}"></strong>
+		</div>
+		
+		<div th:if="${error}" class="alert-error">
+		    <strong th:text="${error}"></strong>
+		</div>
+
+        <div class="submit-container">
+            <button type="submit" class="submit-btn">Submit Application</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById("signupForm");
+    const panInput = document.getElementById("panInput");
+    const aadharInput = document.getElementById("aadharInput");
+    
+    const panAlert = document.getElementById("panAlert");
+    const aadharAlert = document.getElementById("aadharAlert");
+
+    // PAN Validation: 5 Alpha, 4 Numeric, 1 Alpha
+    function validatePAN(val) {
+        const regex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+        return regex.test(val.toUpperCase());
+    }
+
+    // Aadhar Validation: 12 Numeric
+    function validateAadhar(val) {
+        const regex = /^[0-9]{12}$/;
+        return regex.test(val);
+    }
+
+    function handleValidation() {
+        let isValid = true;
+
+        // PAN Check
+        if (!validatePAN(panInput.value)) {
+            panAlert.style.display = "block";
+            panInput.classList.add("invalid-field");
+            isValid = false;
+        } else {
+            panAlert.style.display = "none";
+            panInput.classList.remove("invalid-field");
+        }
+
+        // Aadhar Check
+        if (!validateAadhar(aadharInput.value)) {
+            aadharAlert.style.display = "block";
+            aadharInput.classList.add("invalid-field");
+            isValid = false;
+        } else {
+            aadharAlert.style.display = "none";
+            aadharInput.classList.remove("invalid-field");
+        }
+
+        return isValid;
+    }
+
+    // Real-time listener
+    panInput.addEventListener("input", () => {
+        panInput.value = panInput.value.toUpperCase(); // Auto-capitalize
+        if(panInput.value.length >= 10) handleValidation();
+    });
+
+    aadharInput.addEventListener("input", () => {
+        aadharInput.value = aadharInput.value.replace(/\D/g, ''); // Remove non-numeric
+        if(aadharInput.value.length >= 12) handleValidation();
+    });
+
+    form.addEventListener("submit", (e) => {
+        if (!handleValidation()) {
+            e.preventDefault();
+        }
+    });
+</script>
+
+<script th:if="${success}">
+    setTimeout(function() {
+        window.location.href = "/api/auth/do-login";
+    }, 3000);
+</script>
+
+</body>
+</html>

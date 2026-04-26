@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard - MyBank</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-orange: #ffb800;
+            --text-main: #ffffff;
+            --text-dim: #aaaaaa;
+            --border-color: rgba(255, 184, 0, 0.4);
+            --error-red: #ff4b2b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(270deg, #0d0d0d, #1a1a1a, #000000);
+            background-size: 600% 600%;
+            animation: gradientMove 10s ease infinite;
+            color: var(--text-main);
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* BACKGROUND ANIMATION */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            border-radius: 50%;
+            background: rgba(255, 165, 0, 0.1);
+            animation: float 20s linear infinite;
+            bottom: -150px;
+        }
+
+        .bg-animation span:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-duration: 15s; }
+        .bg-animation span:nth-child(2) { width: 120px; height: 120px; left: 30%; animation-duration: 18s; }
+        .bg-animation span:nth-child(3) { width: 60px; height: 60px; left: 50%; animation-duration: 12s; }
+        .bg-animation span:nth-child(4) { width: 150px; height: 150px; left: 70%; animation-duration: 22s; }
+        .bg-animation span:nth-child(5) { width: 100px; height: 100px; left: 85%; animation-duration: 17s; }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-1000px) scale(1.2); opacity: 0; }
+        }
+
+        /* DASHBOARD CONTAINER */
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 550px; /* Slightly wider to accommodate larger text */
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-section {
+            /* Requirement: No line, Left Aligned */
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        /* Requirement: Welcome heading bigger */
+        h1 { 
+            margin: 0; 
+            font-size: 36px; 
+            color: var(--text-main); 
+            margin-bottom: 15px;
+        }
+
+        /* Requirement: Account No and Email with orange color and larger size */
+        .acc-info, .email-info { 
+            color: var(--accent-orange); 
+            font-size: 18px; 
+            margin-top: 8px; 
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .balance-card {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-orange);
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .balance-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .balance-amount { font-size: 32px; font-weight: bold; margin: 5px 0; }
+        .account-type { font-size: 14px; color: var(--accent-orange); }
+
+        /* BUTTON GRIDS */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .secondary-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* BUTTON STYLING */
+        .btn {
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            border: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--accent-orange);
+            color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-logout {
+            background: transparent;
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 184, 0, 0.2);
+        }
+
+        .btn-logout:hover {
+            background: var(--error-red);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);
+        }
+		
+		/* Styling for disabled buttons */
+		.btn-disabled {
+		    opacity: 0.5;
+		    cursor: not-allowed !important; /* Shows the 'cancel' circle cursor */
+		    pointer-events: none; /* Prevents clicking */
+		    filter: grayscale(1); /* Optional: makes it look greyed out */
+		}
+
+		/* Ensure the hover still works on the container if you want to show a tooltip later */
+		.button-container {
+		    display: flex;
+		    gap: 10px;
+		}
+    </style>
+</head>
+<body>
+
+    <div class="bg-animation">
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Welcome, <span th:text="${user.name}">User</span></h1>
+            <div class="acc-info">Account No: <span th:text="${account.accountNumber}">XXXXXXXX</span></div>
+            <div class="email-info">Email: <span th:text="${user.email}">user@example.com</span></div>
+        </div>
+
+        <div class="balance-card">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-amount">₹<span th:text="${account.availableBalance}">0.00</span></div>
+            <div class="account-type" th:text="${account.accountType}">Savings Account</div>
+        </div>
+
+		<div class="action-grid">
+		    <a href="/api/transaction/deposit" class="btn btn-primary">Deposit</a>
+
+		    <a href="/api/transaction/withdraw" 
+		       class="btn btn-primary" 
+		       th:classappend="${account.availableBalance <= 0} ? 'btn-disabled' : ''">Withdraw</a>
+
+		    <a href="/api/transaction/transfer" 
+		       class="btn btn-primary" 
+		       th:classappend="${account.availableBalance <= 0} ? 'btn-disabled' : ''">Transfer</a>
+		</div>
+
+        <div class="secondary-actions">
+            <a href="/api/transaction/history" class="btn btn-outline">View Transactions</a>
+            <a href="/api/auth/profile" class="btn btn-outline">Profile Info</a>
+            <form action="/logout" method="post">
+                <button type="submit" class="btn btn-logout" style="width: 100%;">Logout</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

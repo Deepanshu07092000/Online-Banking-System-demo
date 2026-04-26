@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Signup - Personal Details</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-orange: #ffb800;
+            --text-main: #ffffff;
+            --text-dim: #aaaaaa;
+            --border-color: rgba(255, 184, 0, 0.4);
+            --error-red: #ff4b2b;
+        }
+
+        /* BODY & ANIMATION (Kept from original) */
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(270deg, #0d0d0d, #1a1a1a, #000000);
+            background-size: 600% 600%;
+            animation: gradientMove 10s ease infinite;
+            overflow-x: hidden;
+            color: var(--text-main);
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .bg-animation span { position: absolute; display: block; border-radius: 50%; background: rgba(255, 165, 0, 0.1); animation: float 20s linear infinite; bottom: -150px; }
+        .bg-animation span:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-duration: 15s; }
+        .bg-animation span:nth-child(2) { width: 120px; height: 120px; left: 30%; animation-duration: 18s; }
+        .bg-animation span:nth-child(3) { width: 60px; height: 60px; left: 50%; animation-duration: 12s; }
+        .bg-animation span:nth-child(4) { width: 150px; height: 150px; left: 70%; animation-duration: 22s; }
+        .bg-animation span:nth-child(5) { width: 100px; height: 100px; left: 85%; animation-duration: 17s; }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-1000px) scale(1.2); opacity: 0; }
+        }
+
+        /* CONTAINER */
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 650px;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            margin: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 { text-align: center; margin: 0; font-size: 28px; letter-spacing: 1px; }
+        h2 { text-align: center; color: var(--text-dim); font-size: 15px; font-weight: normal; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+        .formNo { text-align: center; color: var(--accent-orange); font-weight: bold; margin: 10px 0; font-size: 14px; }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .form-group label { color: #ccc; font-size: 14px; font-weight: 500; }
+
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"], select {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus { border-color: var(--accent-orange); box-shadow: 0 0 10px rgba(255, 184, 0, 0.2); }
+
+        /* PROFESSIONAL ERROR BOX */
+        .dob-wrapper { grid-column: 2; } /* Keeps input aligned in grid */
+        
+        #dobError {
+            background: rgba(255, 75, 43, 0.15);
+            color: #ff9485;
+            border-left: 3px solid var(--error-red);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+            animation: slideDown 0.3s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Error state for input */
+        input.invalid-dob {
+            border-color: var(--error-red) !important;
+            box-shadow: 0 0 8px rgba(255, 75, 43, 0.2) !important;
+        }
+
+        .radio-group { display: flex; align-items: center; gap: 30px; color: white; }
+        .radio-group label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+        input[type="radio"] { accent-color: var(--accent-orange); width: 18px; height: 18px; }
+
+        .btn-container { text-align: center; margin-top: 35px; }
+        button {
+            padding: 14px 60px;
+            background: var(--accent-orange);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover { background: #ffcc00; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 184, 0, 0.3); }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) sepia(1) saturate(5) hue-rotate(10deg);
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .form-group { grid-template-columns: 1fr; gap: 5px; }
+            .dob-wrapper { grid-column: 1; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-animation">
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="container">
+        <h1>Signup Application</h1>
+        <div class="formNo">FORM NO: <span th:text="${formNo}"></span></div>
+        <h2>Page 1: Personal Details</h2>
+
+        <form action="/api/auth/signup2" method="post" th:object="${signupRequestDTO}">
+            <input type="hidden" name="formNo" th:value="${formNo}"/>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="eg-:John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label>Father's Name</label>
+                <input type="text" name="fatherName" placeholder="Father's Full Name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Date of Birth</label>
+                <div class="dob-wrapper">
+                    <input type="date" name="dateOfBirth" id="dob" required>
+                    <div id="dobError">
+                        <strong>⚠ Access Restricted:</strong> You must be at least 18 years old to open an account.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Gender</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="gender" value="Male" required> Male</label>
+                    <label><input type="radio" name="gender" value="Female"> Female</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="eg-:example@mybank.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-group">
+                <label>Marital Status</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="maritalStatus" value="Married" required> Married</label>
+                    <label><input type="radio" name="maritalStatus" value="Unmarried"> Unmarried</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Full Address</label>
+                <input type="text" name="address" placeholder="eg-:Street, Landmark" required>
+            </div>
+
+            <div class="form-group">
+                <label>City</label>
+                <input type="text" name="city" required>
+            </div>
+			
+			<div class="form-group">
+				<label>Pin Code</label>
+				<input type="text" name="pinCode" placeholder="Contains only 6 Digits" pattern="[0-9]{6}" maxlength="6" required>
+			</div>
+
+            <div class="form-group">
+                <label>State</label>
+                <input type="text" name="state" required>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit">Continue to Next Step</button>
+            </div>
+        </form>
+    </div>
+	
+	<!---------- Age Validation Logic---------------------------->
+	<script>
+	    const dobInput = document.getElementById("dob");
+	    const errorBox = document.getElementById("dobError");
+	    const form = document.querySelector("form");
+
+	    function validateAge() {
+	        const dobValue = dobInput.value;
+            if(!dobValue) return true;
+
+            const dob = new Date(dobValue);
+	        const today = new Date();
+	        let age = today.getFullYear() - dob.getFullYear();
+	        const m = today.getMonth() - dob.getMonth();
+
+	        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+	            age--;
+	        }
+
+	        if (age < 18) {
+	            errorBox.style.display = "block";
+                dobInput.classList.add("invalid-dob");
+                return false;
+	        } else {
+	            errorBox.style.display = "none";
+                dobInput.classList.remove("invalid-dob");
+                return true;
+	        }
+	    }
+
+	    dobInput.addEventListener("change", validateAge);
+
+	    form.addEventListener("submit", function (e) {
+	        if (!validateAge()) {
+	            e.preventDefault();
+                // Vibration effect for emphasis
+                dobInput.style.animation = "none";
+                setTimeout(() => { dobInput.style.animation = "shake 0.3s"; }, 10);
+	        }
+	    });
+
+	    // Add a shake animation to CSS style tag above or just leave as is
+	    // Prevent future dates
+	    const maxDate = new Date().toISOString().split("T")[0];
+	    dobInput.setAttribute("max", maxDate);
+	</script>
+	
+	<!---------- Pincode verfication---------------------------->
+	<script>
+	    const pinInput = document.querySelector("input[name='pinCode']");
+
+	    pinInput.addEventListener("input", function () {
+	        // Allow only digits
+	        this.value = this.value.replace(/[^0-9]/g, "");
+
+	        // Limit to 6 digits
+	        if (this.value.length > 6) {
+	            this.value = this.value.slice(0, 6);
+	        }
+	    });
+	</script>
+
+</body>
+</html>

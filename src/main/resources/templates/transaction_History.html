@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - MyBank</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --accent-gold: #ffb800;
+            --text-main: #e0e0e0;
+            --text-dim: #a0a0a0;
+            --card-glass: rgba(255, 255, 255, 0.05);
+            --success-green: #00ff88;
+            --error-red: #ff4b2b;
+            --transfer-blue: #00d4ff;
+        }
+
+        /* BACKGROUND ANIMATION */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-main);
+            background: linear-gradient(270deg, #0d0d0d, #1a1a1a, #000000);
+            background-size: 600% 600%;
+            animation: gradientMove 10s ease infinite;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            border-radius: 50%;
+            background: rgba(255, 165, 0, 0.08);
+            animation: float 20s linear infinite;
+            bottom: -150px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.3; }
+            100% { transform: translateY(-1000px) scale(1.3); opacity: 0; }
+        }
+
+        /* MAIN LAYOUT */
+        .history-card {
+            position: relative;
+            z-index: 2;
+            background: var(--card-glass);
+            width: 100%;
+            max-width: 1100px;
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        }
+
+        h1 { text-align: center; font-size: 32px; margin-bottom: 30px; letter-spacing: 1px; }
+
+        /* USER INFO AREA */
+        .user-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 184, 0, 0.2);
+        }
+
+        .info-item { font-size: 16px; font-weight: 500; }
+        .info-item span { color: var(--accent-gold); margin-left: 8px; font-weight: 700; }
+
+        /* TABLE STYLING */
+        .table-container { overflow-x: auto; margin-bottom: 30px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead tr {
+            background: rgba(255, 184, 0, 0.1);
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        th, td { padding: 18px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+        tbody tr { transition: all 0.3s ease; }
+        tbody tr:hover { background: rgba(255, 255, 255, 0.05); cursor: pointer; }
+
+        /* RECENT TRANSACTIONS HIGHLIGHT */
+        .recent-row { border-left: 4px solid var(--accent-gold); background: rgba(255, 184, 0, 0.02); }
+
+        /* TRANSACTION TYPE COLORS */
+        .amt-deposit { color: var(--success-green); font-weight: bold; }
+        .amt-withdraw { color: var(--error-red); font-weight: bold; }
+        .amt-transfer { color: var(--transfer-blue); font-weight: bold; }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .page-btn.active, .page-btn:hover {
+            background: var(--accent-gold);
+            color: black;
+            border-color: var(--accent-gold);
+        }
+
+        /* LOGOUT BUTTON */
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .logout-btn {
+            background: var(--error-red);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover { background: #d32f2f; transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+
+<div class="bg-animation">
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="history-card">
+    <h1>Transactions History</h1>
+
+    <div class="user-summary">
+        <div class="info-item">UserName: <span th:text="${userName}">Deepanshu</span></div>
+        <div class="info-item">AccountNo: <span th:text="${maskedAccountNo}">123XXXXX890</span></div>
+    </div>
+
+    <div class="table-container">
+		<table>
+		    <thead>
+		        <tr>
+		            <th>S.No</th> <th>From</th>
+		            <th>To</th>
+		            <th>Amount</th>
+		            <th>Type</th>
+		            <th>Status</th>
+		            <th>Date & Time</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		        <tr th:each="tx, iter : ${transactions}" th:classappend="${iter.index < 5} ? 'recent-row' : ''">
+		            <td th:text="${iter.count}">1</td>
+
+		            <td>
+		                <span th:if="${tx.fromAccount != null}" 
+		                      th:text="'XXXXXX' + ${#strings.substring(tx.fromAccount.accountNumber, tx.fromAccount.accountNumber.length() - 4)}">
+		                </span>
+		                <span th:unless="${tx.fromAccount != null}">-</span>
+		            </td>
+
+		            <td>
+		                <span th:if="${tx.toAccount != null}" 
+		                      th:text="'XXXXXX' + ${#strings.substring(tx.toAccount.accountNumber, tx.toAccount.accountNumber.length() - 4)}">
+		                </span>
+		                <span th:unless="${tx.toAccount != null}">-</span>
+		            </td>
+		            
+		            <td>
+		                <span th:if="${tx.type.name() == 'DEPOSIT'}" class="amt-deposit" th:text="'+ ₹' + ${tx.amount}"></span>
+		                <span th:if="${tx.type.name() == 'WITHDRAW'}" class="amt-withdraw" th:text="'- ₹' + ${tx.amount}"></span>
+		                <span th:if="${tx.type.name() == 'TRANSFER'}" class="amt-transfer">
+		                    ⇄ <span th:text="'₹' + ${tx.amount}"></span>
+		                </span>
+		            </td>
+		            
+		            <td th:text="${tx.type}">Deposit</td>
+		            <td>
+		                <span class="status-pill" th:text="${tx.status}"
+		                      th:style="${tx.status.name() == 'SUCCESS'} ? 'color: #00ff88;' : 'color: #ff4b2b;'">
+		                </span>
+		            </td>
+		            <td th:text="${#temporals.format(tx.transactionDateandTime, 'dd MMM yyyy, HH:mm')}">16 Apr 2026, 14:30</td>
+		        </tr>
+		    </tbody>
+		</table>
+    </div>
+
+    <div class="pagination">
+        <button class="page-btn">Prev</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">Next</button>
+    </div>
+
+    <div class="footer-actions">
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

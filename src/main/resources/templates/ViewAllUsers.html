@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Users Management - MyBank</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --accent-gold: #ffb800;
+            --text-main: #e0e0e0;
+            --text-dim: #a0a0a0;
+            --card-glass: rgba(255, 255, 255, 0.05);
+            --success-green: #00ff88;
+            --error-red: #ff4b2b;
+            --info-blue: #00d4ff;
+        }
+
+        /* BACKGROUND ANIMATION */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-main);
+            background: linear-gradient(270deg, #0d0d0d, #1a1a1a, #000000);
+            background-size: 600% 600%;
+            animation: gradientMove 10s ease infinite;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            border-radius: 50%;
+            background: rgba(255, 165, 0, 0.08);
+            animation: float 20s linear infinite;
+            bottom: -150px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.3; }
+            100% { transform: translateY(-1000px) scale(1.3); opacity: 0; }
+        }
+
+        /* MAIN LAYOUT */
+        .admin-card {
+            position: relative;
+            z-index: 2;
+            background: var(--card-glass);
+            width: 95%;
+            max-width: 1400px;
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        }
+
+        h1 { text-align: center; font-size: 32px; margin-bottom: 30px; letter-spacing: 1px; color: var(--accent-gold); }
+
+        /* TABLE STYLING */
+        .table-container { 
+            overflow-x: auto; 
+            margin-bottom: 30px; 
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        thead tr {
+            background: rgba(255, 184, 0, 0.15);
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        th, td { padding: 15px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+        tbody tr { transition: all 0.3s ease; }
+        tbody tr:hover { background: rgba(255, 184, 0, 0.05); }
+
+        .status-active { color: var(--success-green); font-weight: bold; }
+        .status-inactive { color: var(--error-red); font-weight: bold; }
+
+        .masked-data {
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+        }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .page-btn.active, .page-btn:hover {
+            background: var(--accent-gold);
+            color: black;
+            border-color: var(--accent-gold);
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { color: var(--accent-gold); }
+
+        .logout-btn {
+            background: var(--error-red);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover { background: #d32f2f; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<div class="bg-animation">
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="admin-card">
+    <h1>User Details</h1>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User Name</th>
+                    <th>Gender</th>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>Pin</th>
+                    <th>State</th>
+                    <th>DOB</th>
+                    <th>Email</th>
+                    <th>Father Name</th>
+                    <th>Form No</th>
+                    <th>Income</th>
+                    <th>Occupation</th>
+                    <th>PAN</th>
+                    <th>Aadhaar</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+				<tr th:each="user : ${users}">
+				    <td th:text="${user.id}"></td>
+				    
+				    <!-- FIXED -->
+				    <td th:text="${user.name}"></td>
+				    
+				    <td th:text="${user.gender}"></td>
+				    <td th:text="${user.address}"></td>
+				    <td th:text="${user.city}"></td>
+				    <td th:text="${user.pinCode}"></td>
+				    <td th:text="${user.state}"></td>
+				    
+				    <!-- SAFE DATE FORMAT -->
+				    <td th:text="${user.dateOfBirth != null ? #temporals.format(user.dateOfBirth, 'dd MMM yyyy') : 'N/A'}"></td>
+				    
+				    <td th:text="${user.email}"></td>
+				    <td th:text="${user.fatherName}"></td>
+				    <td th:text="${user.formNo}"></td>
+				    
+				    <!-- SAFE INCOME -->
+				    <td th:text="${user.income != null ? '₹' + user.income : 'N/A'}"></td>
+				    
+				    <td th:text="${user.occupation}"></td>
+				    
+				    <!-- SAFE PAN -->
+				    <td class="masked-data"
+				        th:text="${user.panNumber != null ? 'XXXXX' + #strings.substring(user.panNumber, user.panNumber.length() - 4) : 'N/A'}">
+				    </td>
+				    
+				    <!-- SAFE AADHAR -->
+				    <td class="masked-data"
+				        th:text="${user.aadharNumber != null ? 'XXXX-XXXX-' + #strings.substring(user.aadharNumber, user.aadharNumber.length() - 4) : 'N/A'}">
+				    </td>
+				    
+				    <td>
+				        <span th:class="${user.status == 'ACTIVE' ? 'status-active' : 'status-inactive'}"
+				              th:text="${user.status}"></span>
+				    </td>
+				</tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <button class="page-btn">Prev</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">Next</button>
+    </div>
+
+    <div class="footer-actions">
+        <a href="/api/admin/admin-dashboard" class="back-btn">← Back to Dashboard</a>
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
